@@ -1,0 +1,71 @@
+.deployment-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 2rem;
+}
+.deployment-form .form-label {
+  font-size: 17px;
+  margin: 0.5rem 0;
+}
+.deployment-form .form-label .form-input {
+  margin: 3px;
+}
+.deployment-form .sub-label {
+  padding-left: 1rem;
+}
+
+.App {
+  text-align: center;
+}
+.App-body {
+  padding: 20px;
+}
+@media (max-width: 768px) {
+  .App-body {
+    padding: 10px;
+  }
+}
+
+.App-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #282c34;
+  color: white;
+}
+@media (max-width: 768px) {
+  .App-header {
+    padding: 10px;
+    flex-direction: column;
+  }
+}
+.App-header .App-logo {
+  height: 40px;
+}
+.App-header .App-nav {
+  display: flex;
+  gap: 20px;
+}
+.App-header .App-nav a {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.App-header .App-nav a:hover {
+  color: blue;
+}
+
+.App-footer {
+  padding: 20px;
+  background-color: #282c34;
+  color: white;
+}
+@media (max-width: 768px) {
+  .App-footer {
+    padding: 10px;
+  }
+}
+
+/*# sourceMappingURL=App.css.map */

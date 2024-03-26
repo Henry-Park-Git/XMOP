@@ -1,0 +1,11 @@
+.App {
+    text-align: center;
+  
+    &-body {
+      padding: 20px;
+  
+      @include respond-to('mobile') {
+        padding: 10px;
+      }
+    }
+}
