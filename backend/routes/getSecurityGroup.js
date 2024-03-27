@@ -6,6 +6,7 @@ const app = express();
 app.use(bodyParser.json());
 
 //Testing Changes.
+// Test 2
 // Set AWS credentials
 AWS.config.update({
     accessKeyId: '***REMOVED-AWS-ACCESS-KEY***',
