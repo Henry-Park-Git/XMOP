@@ -7,8 +7,8 @@ app.use(bodyParser.json());
 
 // Set AWS credentials
 AWS.config.update({
-    accessKeyId: '***REMOVED-AWS-ACCESS-KEY***',
-    secretAccessKey: '***REMOVED-AWS-SECRET-KEY***',
+    accessKeyId: '/*Put your details*/',
+    secretAccessKey: '/*Put your details*/',
     region: "ap-southeast-2"
 });
 
