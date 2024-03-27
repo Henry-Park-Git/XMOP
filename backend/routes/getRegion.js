@@ -4,8 +4,8 @@ const router = express.Router(); // Use express Router
 
 // Set AWS credentials (이 부분은 실제 프로덕션 코드에 넣지 마세요. 환경 변수 등 보안이 강화된 방식을 사용하세요.)
 AWS.config.update({
-    accessKeyId: '***REMOVED-AWS-ACCESS-KEY***',
-    secretAccessKey: '***REMOVED-AWS-SECRET-KEY***',
+    accessKeyId: '/*Put your details*/',
+    secretAccessKey: '/*Put your details*/',
     region: 'ap-southeast-2'
 });
 
