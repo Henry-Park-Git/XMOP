@@ -5,6 +5,7 @@ const AWS = require('aws-sdk');
 const app = express();
 app.use(bodyParser.json());
 
+//Testing Changes.
 // Set AWS credentials
 AWS.config.update({
     accessKeyId: '/*Put your details*/',
