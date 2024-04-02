@@ -9,6 +9,7 @@ app.use(bodyParser.json());
 AWS.config.update({
     accessKeyId: '/*Put your details*/',
     secretAccessKey: '/*Put your details*/',
+
 });
 
 // Define a function to handle AWS errors

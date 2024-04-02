@@ -1,14 +1,14 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const AWS = require('aws-sdk');
+const router = express.Router(); // 'router' 인스턴스 생성
 
-const app = express();
-app.use(bodyParser.json());
+// AWS.config.update 부분과 함수 정의는 변경 없이 유지
 
 // Set AWS credentials
 AWS.config.update({
     accessKeyId: '/*Put your details*/',
     secretAccessKey: '/*Put your details*/',
+
 });
 
 // Define a function to handle AWS errors
@@ -19,18 +19,15 @@ function handleAWSError(res, e) {
 }
 
 // Define route to create a new security group with specified rules
-app.post('/create-security-group', (req, res) => {
-    // Get parameters from request body
+router.post('/create-security-group', (req, res) => {
     const { region, groupName, description, inboundRules } = req.body;
 
     if (!groupName || !description || !inboundRules) {
         return res.status(400).json({ error: 'Missing required parameters' });
     }
 
-    // Create an EC2 client
     const ec2 = new AWS.EC2({ region });
 
-    // Create security group with specified inbound rules
     ec2.createSecurityGroup({ GroupName: groupName, Description: description }, (err, data) => {
         if (err) {
             return handleAWSError(res, err);
@@ -38,7 +35,6 @@ app.post('/create-security-group', (req, res) => {
 
         const groupId = data.GroupId;
 
-        // Authorize inbound rules
         ec2.authorizeSecurityGroupIngress({ GroupId: groupId, IpPermissions: inboundRules }, (err) => {
             if (err) {
                 return handleAWSError(res, err);
@@ -49,8 +45,4 @@ app.post('/create-security-group', (req, res) => {
     });
 });
 
-// Start the server
-const port = process.env.PORT || 3000;
-const server = app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+module.exports = router;

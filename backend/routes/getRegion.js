@@ -6,6 +6,7 @@ const router = express.Router(); // Use express Router
 AWS.config.update({
     accessKeyId: '/*Put your details*/',
     secretAccessKey: '/*Put your details*/',
+
     region: 'ap-southeast-2'
 });
 

@@ -10,6 +10,7 @@ app.use(bodyParser.json());
 AWS.config.update({
     accessKeyId: '/*Put your details*/',
     secretAccessKey: '/*Put your details*/',
+
     // region: 'ap-southeast-2'
 });
 

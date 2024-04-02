@@ -1,14 +1,12 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const AWS = require('aws-sdk');
-
-const app = express();
-app.use(bodyParser.json());
+const router = express.Router(); // 'router' 인스턴스 생성
 
 // Set AWS credentials
 AWS.config.update({
     accessKeyId: '/*Put your details*/',
     secretAccessKey: '/*Put your details*/',
+
     region: "ap-southeast-2"
 });
 
@@ -19,18 +17,15 @@ function handleAWSError(res, e) {
 }
 
 // Define route for getting engine versions
-app.post('/engine_versions', (req, res) => {
-    // Get engine options from request body
+router.post('/engine_versions', (req, res) => {
     const { engine_type } = req.body;
 
     if (!engine_type) {
         return res.status(400).json({ error: 'Engine type not provided' });
     }
 
-    // Create an RDS client
     const rds = new AWS.RDS();
 
-    // Describe available engine versions
     rds.describeDBEngineVersions({ Engine: engine_type }, (err, data) => {
         if (err) {
             return handleAWSError(res, err);
@@ -41,18 +36,4 @@ app.post('/engine_versions', (req, res) => {
     });
 });
 
-// Start the server
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
-
-// Engine options:
-// aurora-mysql
-// aurora-postgresql
-// mariadb
-// mysql
-// postgres
-
-
-//  https://instances.vantage.sh/rds/?region=ap-southeast-2
+module.exports = router;

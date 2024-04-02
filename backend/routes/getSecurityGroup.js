@@ -1,16 +1,15 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const AWS = require('aws-sdk');
+const router = express.Router(); // 'router' 인스턴스 생성
 
-const app = express();
-app.use(bodyParser.json());
+// AWS.config.update 부분과 함수 정의는 변경 없이 유지
 
-//Testing Changes.
-// Test 2
 // Set AWS credentials
 AWS.config.update({
     accessKeyId: '/*Put your details*/',
     secretAccessKey: '/*Put your details*/',
+
 });
 
 // Define a function to handle AWS errors
@@ -20,28 +19,26 @@ function handleAWSError(res, e) {
     return res.status(500).json({ error: error_message });
 }
 
+// bodyParser.json() 미들웨어는 여기서는 제거합니다. 이는 서버 레벨에서 이미 적용되기 때문입니다.
+
 // Define route to get all security groups in a region
-app.post('/security-groups', (req, res) => {
-    // Get region from request body
+router.post('/security-groups', (req, res) => {
+    // 여기서의 로직은 변경 없이 유지
     const { region } = req.body;
 
     if (!region) {
         return res.status(400).json({ error: 'Region not provided' });
     }
 
-    // Create an EC2 client with the specified region
     const ec2 = new AWS.EC2({ region });
 
-    // Describe security groups in the specified region
     ec2.describeSecurityGroups({}, (err, data) => {
         if (err) {
             return handleAWSError(res, err);
         }
 
         try {
-            // Extract security group names
             const securityGroups = data.SecurityGroups.map(group => group.GroupName);
-
             return res.json({ securityGroups });
         } catch (error) {
             return handleAWSError(res, error);
@@ -49,8 +46,4 @@ app.post('/security-groups', (req, res) => {
     });
 });
 
-// Start the server
-const port = process.env.PORT || 3000;
-const server = app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+module.exports = router;

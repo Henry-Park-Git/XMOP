@@ -1,14 +1,12 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const AWS = require('aws-sdk');
-
-const app = express();
-app.use(bodyParser.json());
+const router = express.Router(); // 'router' 인스턴스 생성
 
 // Set AWS credentials
 AWS.config.update({
     accessKeyId: '/*Put your details*/',
     secretAccessKey: '/*Put your details*/',
+
     region: "ap-southeast-2"
 });
 
@@ -19,18 +17,15 @@ function handleAWSError(res, e) {
 }
 
 // Define route for getting DB instance types
-app.post('/instance_types', (req, res) => {
-    // Get engine options and engine version from request body
+router.post('/instance_types', (req, res) => {
     const { engine, engine_version } = req.body;
 
     if (!engine || !engine_version) {
         return res.status(400).json({ error: 'Engine option and engine version are required' });
     }
 
-    // Create an RDS client
     const rds = new AWS.RDS();
 
-    // Describe available DB instance types
     rds.describeOrderableDBInstanceOptions({
         Engine: engine,
         EngineVersion: engine_version,
@@ -46,8 +41,4 @@ app.post('/instance_types', (req, res) => {
     });
 });
 
-// Start the server
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+module.exports = router;

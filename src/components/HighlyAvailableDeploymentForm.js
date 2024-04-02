@@ -8,16 +8,22 @@ const HighlyAvailableDeploymentForm = () => {
   const [selectedAmiType, setSelectedAmiType] = useState(""); // 선택된 AMI 유형을 저장할 상태 (Linux 또는 Ubuntu)
   const [imageId, setImageId] = useState(""); // 사용자가 입력한 Image ID를 저장할 상태 추가
   const [instanceType, setInstanceType] = useState("");
-  const [keyPairOption, setKeyPairOption] = useState(""); 
-  const [keyPairName, setKeyPairName] = useState("");
-  const [securityGroups, setSecurityGroups] = useState("");
+  const [keyPairOption, setKeyPairOption] = useState("");
+  const [keyPairNames, setKeyPairNames] = useState([]); // Key Pair 이름 목록을 저장할 상태
+  const [selectedKeyPairName, setSelectedKeyPairName] = useState("");
+  const [keyPairName, setKeyPairName] = useState(""); // 새로운 Key Pair 이름을 저장할 상태
+  const [securityGroupOption, setSecurityGroupOption] = useState(""); // 보안 그룹 옵션을 저장할 상태 추가
+  const [securityGroups, setSecurityGroups] = useState([]); // API 호출 결과를 저장할 상태
+  const [selectedSecurityGroup, setSelectedSecurityGroup] = useState('');
   const [storageConfiguration, setStorageConfiguration] = useState("");
+  const [errorMessage, setErrorMessage] = useState(""); // 오류 메시지를 저장할 새로운 상태
+
   // 인스턴스 타입 목록을 추가
   const instanceTypes = ["t2.micro", "t2.medium", "t3.medium"];
 
   // AWS 지역 정보를 가져오는 useEffect
   useEffect(() => {
-    fetch('http://localhost:3000/api/available_regions')
+    fetch('http://localhost:3000/available_regions')
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -30,7 +36,49 @@ const HighlyAvailableDeploymentForm = () => {
       });
   }, []);
   
+  // Key Pair 목록을 가져오는 useEffect
+  useEffect(() => {
+    if (keyPairOption === "selectExisting") {
+      const url = `http://localhost:3000/key-pairs${awsRegion ? `?region=${awsRegion}` : ''}`;
 
+      fetch(url)
+        .then(response => response.json()) // 첫 번째 then에서 response.json() 호출
+        .then(data => {
+          if (data.error) { // 백엔드에서 오류 메시지가 반환된 경우
+            setErrorMessage("You do not have permission to view key pairs in this region."); // 오류 메시지 설정
+            setKeyPairNames([]); // keyPairNames를 빈 배열로 설정
+          } else {
+            setKeyPairNames(data.keyPairs); // 성공적인 응답 처리
+            setErrorMessage(""); // 오류 메시지 초기화
+          }
+        })
+        .catch(error => {
+          console.error("Fetching key pairs failed:", error);
+          setErrorMessage("An error occurred while fetching key pairs."); // catch 블록에서 오류 처리
+        });
+    }
+  }, [keyPairOption, awsRegion]);
+
+  // "Attach existing"이 선택되었을때 보안 그룹 목록을 가져옵니다.
+  useEffect(() => {
+    fetch('http://localhost:3000/security-groups')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => setSecurityGroups(data))
+      .catch(error => {
+        console.error("Fetching security groups failed:", error);
+      });
+  }, []);
+  
+  const handleSecurityGroupChange = (event) => {
+    setSelectedSecurityGroup(event.target.value);
+  };
+  
+  
 
   return (
     <form className="deployment-form">
@@ -69,7 +117,7 @@ const HighlyAvailableDeploymentForm = () => {
         />
       </label>
       
-      {/* AMIs 렌더링하는 부분 */}
+      {/* AMI 부분 */}
       <div>
         <label className="form-label">
         <span>AMI: </span>
@@ -152,26 +200,81 @@ const HighlyAvailableDeploymentForm = () => {
           Import
         </label>
 
-        {/* 추가된 로직: "Create new"를 선택했을 때 Key Name 입력 필드를 보여줌 */}
-        {keyPairOption === "createNew" && (
-          <div> 
-            <label className="form-label">
-              Key Name:
-              <input 
-                className="form-input" 
-                type="text" 
-                value={keyPairName} 
-                onChange={e => setKeyPairName(e.target.value)} 
-              />
-            </label>
-          </div>
-        )}
+            {/* "Select existing" 옵션 선택 시 드롭다운 메뉴 표시 */}
+            {
+              keyPairOption === "selectExisting" && (
+                <div>
+                  <label className="form-label">
+                    Key Pairs:
+                    {Array.isArray(keyPairNames) && keyPairNames.length > 0 ? (
+                      <select
+                        value={selectedKeyPairName}
+                        onChange={e => setSelectedKeyPairName(e.target.value)}
+                        className="form-input"
+                      >
+                        {keyPairNames.map(name => (
+                          <option key={name} value={name}>{name}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <p>There are no key pairs available in this region.</p>
+                    )}
+                  </label>
+                </div>
+              )
+            }
+
+            {/* 추가된 로직: "Create new"를 선택했을 때 Key Name 입력 필드를 보여줌 */}
+            {keyPairOption === "createNew" && (
+              <div> 
+                <label className="form-label">
+                  Key Name:
+                  <input 
+                    className="form-input" 
+                    type="text" 
+                    value={keyPairName} 
+                    onChange={e => setKeyPairName(e.target.value)} 
+                  />
+                </label>
+              </div>
+            )}
       </div>
 
       <label className="form-label">
         Security groups:
-        <input className="form-input" type="text" value={securityGroups} onChange={e => setSecurityGroups(e.target.value)} />
+        <span>
+          <input
+            type="radio"
+            value="attach existing"
+            name="securityGroupOption"
+            checked={securityGroupOption === "attach existing"}
+            onChange={(e) => setSecurityGroupOption(e.target.value)}
+          /> Attach existing
+        </span>
+        <span>
+          <input
+            type="radio"
+            value="create new with rules"
+            name="securityGroupOption"
+            checked={securityGroupOption === "create new with rules"}
+            onChange={(e) => setSecurityGroupOption(e.target.value)}
+          /> Create new with rules
+        </span>
       </label>
+        {/* "Attach existing"이 선택되었을때 보안 그룹 목록을 표시 */}  
+        {securityGroupOption === "attach existing" && (
+          <div>
+            <label className="form-label">
+              Security Groups:
+              <select value={selectedSecurityGroup} onChange={handleSecurityGroupChange} className="form-input">
+                {securityGroups.map(group => (
+                  <option key={group} value={group}>{group}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+        )}
+
       <label className="form-label">
         Storage configuration:
         <input className="form-input" type="text" value={storageConfiguration} onChange={e => setStorageConfiguration(e.target.value)} />
