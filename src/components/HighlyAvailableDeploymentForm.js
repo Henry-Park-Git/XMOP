@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+const API_HEADERS = { 'x-api-key': process.env.REACT_APP_API_KEY };
+
 const HighlyAvailableDeploymentForm = () => {
   const [awsRegions, setAwsRegions] = useState([]);
   const [awsRegion, setAwsRegion] = useState("");
@@ -23,7 +25,7 @@ const HighlyAvailableDeploymentForm = () => {
 
   // AWS 지역 정보를 가져오는 useEffect
   useEffect(() => {
-    fetch('http://localhost:3000/available_regions')
+    fetch('http://localhost:3000/available_regions', { headers: API_HEADERS })
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -41,7 +43,7 @@ const HighlyAvailableDeploymentForm = () => {
     if (keyPairOption === "selectExisting") {
       const url = `http://localhost:3000/key-pairs${awsRegion ? `?region=${awsRegion}` : ''}`;
 
-      fetch(url)
+      fetch(url, { headers: API_HEADERS })
         .then(response => response.json()) // 첫 번째 then에서 response.json() 호출
         .then(data => {
           if (data.error) { // 백엔드에서 오류 메시지가 반환된 경우
@@ -61,7 +63,7 @@ const HighlyAvailableDeploymentForm = () => {
 
   // "Attach existing"이 선택되었을때 보안 그룹 목록을 가져옵니다.
   useEffect(() => {
-    fetch('http://localhost:3000/security-groups')
+    fetch('http://localhost:3000/security-groups', { headers: API_HEADERS })
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
