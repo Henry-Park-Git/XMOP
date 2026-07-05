@@ -1,10 +1,23 @@
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const app = express();
 
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors({ origin: process.env.FRONTEND_ORIGIN || 'http://localhost:3001' }));
+
+if (!process.env.API_KEY) {
+    throw new Error('API_KEY environment variable must be set (see backend/.env.example)');
+}
+
+// Require a shared secret on every request so this AWS-mutating API isn't open to the internet
+app.use((req, res, next) => {
+    if (req.header('x-api-key') !== process.env.API_KEY) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    next();
+});
 
 const regionsRouter = require('./routes/getRegion');
 app.use('/', regionsRouter);

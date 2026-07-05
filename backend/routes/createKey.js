@@ -6,13 +6,7 @@ const fs = require('fs');
 const app = express();
 app.use(bodyParser.json());
 
-// Set AWS credentials
-AWS.config.update({
-    accessKeyId: '/*Put your details*/',
-    secretAccessKey: '/*Put your details*/',
-
-    // region: 'ap-southeast-2'
-});
+// Credentials are resolved by the AWS SDK's default provider chain (AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY env vars, shared config, or instance role)
 
 // Define a function to handle AWS errors
 function handleAWSError(res, e) {
@@ -25,6 +19,10 @@ function handleAWSError(res, e) {
 app.post('/download-keypair', (req, res) => {
     // Generate a unique key pair name
     const { region, keyName } = req.body;
+
+    if (!keyName || !/^[a-zA-Z0-9_-]+$/.test(keyName)) {
+        return res.status(400).json({ error: 'Invalid key name' });
+    }
 
     // Create an EC2 client
     const ec2 = new AWS.EC2({ region });

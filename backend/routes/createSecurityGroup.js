@@ -4,12 +4,7 @@ const router = express.Router(); // 'router' 인스턴스 생성
 
 // AWS.config.update 부분과 함수 정의는 변경 없이 유지
 
-// Set AWS credentials
-AWS.config.update({
-    accessKeyId: '/*Put your details*/',
-    secretAccessKey: '/*Put your details*/',
-
-});
+// Credentials are resolved by the AWS SDK's default provider chain (AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY env vars, shared config, or instance role)
 
 // Define a function to handle AWS errors
 function handleAWSError(res, e) {
@@ -22,7 +17,7 @@ function handleAWSError(res, e) {
 router.post('/create-security-group', (req, res) => {
     const { region, groupName, description, inboundRules } = req.body;
 
-    if (!groupName || !description || !inboundRules) {
+    if (!groupName || !description || !Array.isArray(inboundRules) || inboundRules.length === 0) {
         return res.status(400).json({ error: 'Missing required parameters' });
     }
 

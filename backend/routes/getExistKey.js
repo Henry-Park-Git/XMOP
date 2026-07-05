@@ -2,12 +2,7 @@ const express = require('express');
 const AWS = require('aws-sdk');
 const router = express.Router();
 
-// Set AWS credentials
-AWS.config.update({
-    accessKeyId: '/*Put your details*/',
-    secretAccessKey: '/*Put your details*/',
-
-});
+// Credentials are resolved by the AWS SDK's default provider chain (AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY env vars, shared config, or instance role)
 
 // Define a function to handle AWS errors
 function handleAWSError(res, e) {

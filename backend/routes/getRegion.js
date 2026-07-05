@@ -2,12 +2,9 @@ const express = require('express');
 const AWS = require('aws-sdk');
 const router = express.Router(); // Use express Router
 
-// Set AWS credentials (이 부분은 실제 프로덕션 코드에 넣지 마세요. 환경 변수 등 보안이 강화된 방식을 사용하세요.)
+// Credentials are resolved by the AWS SDK's default provider chain (AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY env vars, shared config, or instance role)
 AWS.config.update({
-    accessKeyId: '/*Put your details*/',
-    secretAccessKey: '/*Put your details*/',
-
-    region: 'ap-southeast-2'
+    region: process.env.AWS_REGION || 'ap-southeast-2'
 });
 
 // Define a function to handle AWS errors
